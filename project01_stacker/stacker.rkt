@@ -10,7 +10,13 @@
 
 (define (read-syntax path port)
     (define src-lines (port->lines port))
-    (datum->syntax #f '(module lucy br 42)))
+    #|format datum... + -> (handle +) ~a is placeholder|#
+    (define src-datums (format-datums '(handle ~a) src-lines))
+    #|
+        "`" is a quasi-quote.. meaning you can substitute variables using ",".. 
+        and also substitute multiple variables using ",@"|#
+    (define module-datum `(module stacker-mod "stacker.rkt" ,@src-datums))
+    (datum->syntax #f module-datum))
 
 #|
 
@@ -19,3 +25,8 @@
     To make a defi­n­i­tion public, we use provide
 |#
 (provide read-syntax)
+
+(define-macro (stacker-module-begine HANDLE-EXPR ...)
+    #'(#%module-begin 'HANDLE-EXPR ...))
+
+(provide (rename-out [stacker-module-begine #%module-begin]))
